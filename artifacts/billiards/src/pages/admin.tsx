@@ -3,11 +3,11 @@ import { useLocation } from "wouter";
 import { useAuth } from "../lib/auth";
 import { Layout } from "../components/layout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Card, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
-import { useGetTables, useCreateTable, useUpdateTable, useDeleteTable, getGetTablesQueryKey } from "@workspace/api-client-react";
-import { useGetUsers, useCreateUser, useUpdateUser, useDeleteUser, getGetUsersQueryKey } from "@workspace/api-client-react";
+import { useGetTables, useCreateTable, useDeleteTable, getGetTablesQueryKey } from "@workspace/api-client-react";
+import { useGetUsers, useCreateUser, useDeleteUser, getGetUsersQueryKey } from "@workspace/api-client-react";
 import { useGetSettings, useUpsertSetting, getGetSettingsQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "../hooks/use-toast";
@@ -83,7 +83,7 @@ function TablesManager() {
 
       <div className="grid gap-3">
         {tables?.map(t => (
-          <div key={t.id} className="flex justify-between items-center p-4 border border-border rounded-md bg-card">
+          <div key={t.id} data-testid={`row-table-${t.id}`} className="flex justify-between items-center p-4 border border-border rounded-md bg-card">
             <div>
               <div className="font-bold font-mono">{t.name}</div>
               <Badge variant="outline" className="mt-1 text-[10px] uppercase">{t.type}</Badge>
@@ -107,7 +107,7 @@ function UsersManager() {
   const { data: users } = useGetUsers();
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  
+
   const [isAdding, setIsAdding] = useState(false);
   const [newUser, setNewUser] = useState({ username: "", password: "", name: "", role: "nhanvien", shift: "Ca 1" });
 
@@ -152,9 +152,7 @@ function UsersManager() {
             <Input placeholder="Mật khẩu" type="password" value={newUser.password} onChange={e => setNewUser(p => ({...p, password: e.target.value}))} />
             <Input placeholder="Tên hiển thị" value={newUser.name} onChange={e => setNewUser(p => ({...p, name: e.target.value}))} />
             <Select value={newUser.role} onValueChange={v => setNewUser(p => ({...p, role: v}))}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
+              <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="nhanvien">Nhân viên</SelectItem>
                 <SelectItem value="quanly">Quản lý</SelectItem>
@@ -169,7 +167,7 @@ function UsersManager() {
 
       <div className="grid gap-3">
         {users?.map(u => (
-          <div key={u.id} className="flex justify-between items-center p-4 border border-border rounded-md bg-card">
+          <div key={u.id} data-testid={`row-user-${u.id}`} className="flex justify-between items-center p-4 border border-border rounded-md bg-card">
             <div>
               <div className="font-bold">{u.name} <span className="font-normal text-muted-foreground text-sm">({u.username})</span></div>
               <Badge variant="outline" className="mt-1 text-[10px] uppercase">{u.role}</Badge>
@@ -198,74 +196,81 @@ function SettingsManager() {
     }
   });
 
-  const getPrice = (type: string) => {
-    const s = settings?.find(s => s.key === `price_${type}`);
-    return s ? s.value : "0";
-  };
+  const getSetting = (key: string) => settings?.find(s => s.key === key)?.value ?? "";
 
-  const handleSave = (type: string, value: string) => {
-    upsertMutation.mutate({
-      key: `price_${type}`,
-      data: { value }
-    });
+  const handleSave = (key: string, value: string) => {
+    if (!value) return;
+    upsertMutation.mutate({ key, data: { value } });
   };
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-xl font-bold">Cài đặt Giá</h2>
-      
-      <Card>
-        <CardContent className="p-4 space-y-4">
-          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 py-3 border-b border-border">
-            <div>
-              <div className="font-bold uppercase">Pool</div>
-              <div className="text-sm text-muted-foreground">Giá mỗi giờ chơi</div>
-            </div>
-            <div className="flex gap-2 items-center">
-              <Input 
-                type="number" 
-                defaultValue={getPrice("pool")} 
-                className="w-32 font-mono" 
-                onBlur={(e) => handleSave("pool", e.target.value)}
-              />
-              <span className="text-sm font-bold text-primary">VND</span>
-            </div>
-          </div>
+    <div className="space-y-6">
+      {/* Price settings */}
+      <div>
+        <h2 className="text-xl font-bold mb-3">Cài đặt Giá</h2>
+        <Card>
+          <CardContent className="p-4 space-y-1 divide-y divide-border">
+            {[
+              { label: "Pool", key: "price_pool" },
+              { label: "Libre", key: "price_libre" },
+              { label: "Snooker", key: "price_snooker" },
+            ].map(({ label, key }) => (
+              <div key={key} className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 py-3">
+                <div>
+                  <div className="font-bold uppercase">{label}</div>
+                  <div className="text-sm text-muted-foreground">Giá mỗi giờ chơi</div>
+                </div>
+                <div className="flex gap-2 items-center">
+                  <Input
+                    type="number"
+                    defaultValue={getSetting(key)}
+                    className="w-36 font-mono"
+                    data-testid={`input-price-${label.toLowerCase()}`}
+                    onBlur={(e) => handleSave(key, e.target.value)}
+                  />
+                  <span className="text-sm font-bold text-primary">VND</span>
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+        <p className="text-xs text-muted-foreground text-center mt-2">Nhấn ra ngoài ô nhập để lưu tự động</p>
+      </div>
 
-          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 py-3 border-b border-border">
-            <div>
-              <div className="font-bold uppercase">Libre</div>
-              <div className="text-sm text-muted-foreground">Giá mỗi giờ chơi</div>
+      {/* Google Sheets settings */}
+      <div>
+        <h2 className="text-xl font-bold mb-1">Google Sheets</h2>
+        <p className="text-sm text-muted-foreground mb-3">
+          Mỗi lần đóng bàn sẽ tự động ghi vào Google Sheet. Chia sẻ sheet với{" "}
+          <span className="font-mono text-xs bg-muted px-1 py-0.5 rounded">bi-223@anh-hoa-497611.iam.gserviceaccount.com</span>{" "}
+          (Editor).
+        </p>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
+              <div>
+                <div className="font-bold">Sheet ID</div>
+                <div className="text-sm text-muted-foreground">Lấy từ URL của Google Sheet</div>
+              </div>
+              <div className="flex gap-2 items-center w-full sm:w-auto">
+                <Input
+                  placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms"
+                  defaultValue={getSetting("google_sheet_id")}
+                  className="font-mono text-xs sm:w-80"
+                  data-testid="input-google-sheet-id"
+                  onBlur={(e) => handleSave("google_sheet_id", e.target.value)}
+                />
+              </div>
             </div>
-            <div className="flex gap-2 items-center">
-              <Input 
-                type="number" 
-                defaultValue={getPrice("libre")} 
-                className="w-32 font-mono" 
-                onBlur={(e) => handleSave("libre", e.target.value)}
-              />
-              <span className="text-sm font-bold text-primary">VND</span>
-            </div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 py-3">
-            <div>
-              <div className="font-bold uppercase">Snooker</div>
-              <div className="text-sm text-muted-foreground">Giá mỗi giờ chơi</div>
-            </div>
-            <div className="flex gap-2 items-center">
-              <Input 
-                type="number" 
-                defaultValue={getPrice("snooker")} 
-                className="w-32 font-mono" 
-                onBlur={(e) => handleSave("snooker", e.target.value)}
-              />
-              <span className="text-sm font-bold text-primary">VND</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-      <p className="text-xs text-muted-foreground text-center">Nhấn ra ngoài ô nhập để lưu tự động</p>
+            {getSetting("google_sheet_id") && (
+              <div className="mt-3 flex items-center gap-2 text-sm text-primary">
+                <span className="h-2 w-2 rounded-full bg-primary inline-block"></span>
+                Sheet đã được cấu hình — sẽ tự đồng bộ khi đóng bàn
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
@@ -283,22 +288,16 @@ export default function Admin() {
     <Layout>
       <div className="p-4 sm:p-6 sm:max-w-4xl mx-auto">
         <h1 className="text-2xl font-bold tracking-tight uppercase mb-6">Quản Trị</h1>
-        
+
         <Tabs defaultValue="tables" className="w-full">
           <TabsList className="grid w-full grid-cols-3 mb-6">
             <TabsTrigger value="tables" className="uppercase font-bold tracking-wider text-xs sm:text-sm">Bàn</TabsTrigger>
             <TabsTrigger value="users" className="uppercase font-bold tracking-wider text-xs sm:text-sm">Nhân viên</TabsTrigger>
-            <TabsTrigger value="settings" className="uppercase font-bold tracking-wider text-xs sm:text-sm">Giá</TabsTrigger>
+            <TabsTrigger value="settings" className="uppercase font-bold tracking-wider text-xs sm:text-sm">Cài đặt</TabsTrigger>
           </TabsList>
-          <TabsContent value="tables">
-            <TablesManager />
-          </TabsContent>
-          <TabsContent value="users">
-            <UsersManager />
-          </TabsContent>
-          <TabsContent value="settings">
-            <SettingsManager />
-          </TabsContent>
+          <TabsContent value="tables"><TablesManager /></TabsContent>
+          <TabsContent value="users"><UsersManager /></TabsContent>
+          <TabsContent value="settings"><SettingsManager /></TabsContent>
         </Tabs>
       </div>
     </Layout>

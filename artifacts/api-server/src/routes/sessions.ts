@@ -7,6 +7,8 @@ import {
   GetSessionsQueryParams,
 } from "@workspace/api-zod";
 import { requireAuth, type AuthRequest } from "../middlewares/auth";
+import { appendSessionToSheet } from "../services/google-sheets";
+import { logger } from "../lib/logger";
 
 const router = Router();
 
@@ -137,6 +139,25 @@ router.post("/close", requireAuth, async (req: AuthRequest, res) => {
   }
 
   res.json({ success: true, session: serializeSession(session!), table: serializeTable(updatedTable!) });
+
+  // Async Google Sheets sync — does not block response
+  const [sheetSetting] = await db.select().from(settingsTable).where(eq(settingsTable.key, "google_sheet_id")).limit(1);
+  if (sheetSetting?.value) {
+    appendSessionToSheet(sheetSetting.value, {
+      date: session!.date,
+      tableName: session!.tableName,
+      tableType: session!.tableType,
+      openedByName: session!.openedByName,
+      closedByName: session!.closedByName,
+      startTime: session!.startTime.toISOString(),
+      endTime: session!.endTime?.toISOString() ?? null,
+      durationMinutes: session!.durationMinutes,
+      pricePerHour: session!.pricePerHour,
+      amount: session!.amount,
+    })
+      .then(() => db.update(sessionsTable).set({ syncedToSheets: true }).where(eq(sessionsTable.id, session!.id)))
+      .catch((err: unknown) => logger.error({ err, sessionId: session!.id }, "Google Sheets sync failed"));
+  }
 });
 
 router.get("/", requireAuth, async (req, res) => {
