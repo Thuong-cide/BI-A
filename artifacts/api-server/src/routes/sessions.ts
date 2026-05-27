@@ -104,7 +104,7 @@ router.post("/close", requireAuth, async (req: AuthRequest, res) => {
   const durationMinutes = Math.max(1, Math.round(diffMs / 1000 / 60));
   const amount = Math.round((pricePerHour / 60) * durationMinutes);
 
-  const date = endTime.toLocaleDateString("vi-VN");
+  const date = endTime.toISOString().split("T")[0]; // YYYY-MM-DD
 
   const [session] = await db
     .insert(sessionsTable)

@@ -8,17 +8,19 @@ import { Card, CardContent } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
 
 export default function History() {
-  const [date, setDate] = useState(() => new Date().toISOString().split("T")[0]);
+  const [date, setDate] = useState("");
   const [tableId, setTableId] = useState<string>("all");
 
   const { data: tables } = useGetTables();
 
-  const { data: sessions, isLoading } = useGetSessions({
-    date,
+  const params = {
+    date: date || undefined,
     tableId: tableId === "all" ? undefined : tableId,
-  }, {
+  };
+
+  const { data: sessions, isLoading } = useGetSessions(params, {
     query: {
-      queryKey: getGetSessionsQueryKey({ date, tableId: tableId === "all" ? undefined : tableId }),
+      queryKey: getGetSessionsQueryKey(params),
     }
   });
 
