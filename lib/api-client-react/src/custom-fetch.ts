@@ -358,6 +358,18 @@ export async function customFetch<T = unknown>(
     }
   }
 
+  // Fallback to localStorage if no token was set by the getter
+  if (!headers.has("authorization")) {
+    try {
+      const token = localStorage.getItem("token");
+      if (token) {
+        headers.set("authorization", `Bearer ${token}`);
+      }
+    } catch (e) {
+      // Ignore localStorage errors (e.g. during SSR or if blocked)
+    }
+  }
+
   const requestInfo = { method, url: resolveUrl(input) };
 
   const response = await fetch(input, { ...init, method, headers });

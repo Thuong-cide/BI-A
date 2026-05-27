@@ -1,0 +1,354 @@
+Điện thoại / máy tính (trình duyệt)
+        ↓ WiFi nội bộ (LAN)
+Máy tính chạy server (localhost / IP nội bộ)
+        ↓
+Backend: Node.js + Express
+        ↓
+Database: PostgreSQL (local)
+        ↓ Internet
+Google Sheets API (đồng bộ khi đóng bàn)
+
+Công nghệ sử dụng
+Frontend:   React + Vite + Tailwind CSS (mobile-first)
+Backend:    Node.js + Express
+Database:   PostgreSQL (chạy local trên máy tính)
+ORM:        Prisma
+Realtime:   Socket.IO (đồng bộ trạng thái bàn giữa các thiết bị)
+Sheets:     Google Sheets API v4 + Service Account
+
+Cấu trúc thư mục
+billiards-app/
+├── server/
+│   ├── index.js                  # Express + Socket.IO entry point
+│   ├── prisma/
+│   │   └── schema.prisma         # định nghĩa database
+│   ├── routes/
+│   │   ├── auth.js               # đăng nhập / session
+│   │   ├── tables.js             # CRUD bàn bi-a
+│   │   ├── sessions.js           # mở/đóng bàn, tính tiền
+│   │   └── sheets.js             # xuất Google Sheets
+│   ├── services/
+│   │   ├── billing.js            # logic tính tiền
+│   │   └── googleSheets.js       # ghi Google Sheets
+│   └── socket/
+│       └── tableSocket.js        # realtime events
+│
+├── client/
+│   ├── src/
+│   │   ├── App.jsx
+│   │   ├── pages/
+│   │   │   ├── LoginPage.jsx
+│   │   │   ├── DashboardPage.jsx
+│   │   │   ├── HistoryPage.jsx
+│   │   │   └── AdminPage.jsx
+│   │   ├── components/
+│   │   │   ├── TableCard.jsx
+│   │   │   ├── BillModal.jsx
+│   │   │   └── NavBar.jsx
+│   │   └── hooks/
+│   │       ├── useSocket.js
+│   │       └── useAuth.js
+│   └── vite.config.js
+│
+├── .env                          # biến môi trường
+└── package.json
+
+Schema PostgreSQL (Prisma)
+prisma// server/prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  password  String
+  name      String
+  role      String   @default("nhanvien") // "nhanvien" | "quanly"
+  shift     String   @default("Ca tối")
+  createdAt DateTime @default(now())
+
+  openedSessions  Session[] @relation("OpenedBy")
+  closedSessions  Session[] @relation("ClosedBy")
+}
+
+model Table {
+  id        String   @id @default(uuid())
+  name      String
+  type      String   @default("Pool") // "Pool" | "Libre" | "Snooker"
+  status    String   @default("empty") // "empty" | "active"
+  startTime DateTime?
+  openedById String?
+  openedByName String?
+  createdAt DateTime @default(now())
+
+  sessions  Session[]
+}
+
+model Session {
+  id              String   @id @default(uuid())
+  tableId         String
+  tableName       String
+  tableType       String
+  openedById      String
+  openedByName    String
+  closedById      String?
+  closedByName    String?
+  startTime       DateTime
+  endTime         DateTime?
+  durationMinutes Int?
+  amount          Int?
+  pricePerHour    Int
+  date            String
+  syncedToSheets  Boolean  @default(false)
+  createdAt       DateTime @default(now())
+
+  table    Table @relation(fields: [tableId], references: [id])
+  openedBy User  @relation("OpenedBy", fields: [openedById], references: [id])
+  closedBy User? @relation("ClosedBy", fields: [closedById], references: [id])
+}
+
+model Setting {
+  key   String @id
+  value String
+}
+
+File .env
+env# PostgreSQL
+DATABASE_URL="postgresql://postgres:matkhau@localhost:5432/billiards_db"
+
+# Google Sheets
+GOOGLE_SERVICE_ACCOUNT_JSON={"type":"service_account","project_id":"..."}
+GOOGLE_SHEET_ID=your_sheet_id_here
+
+# App
+PORT=4000
+JWT_SECRET=your_secret_key_here
+CLIENT_URL=http://localhost:5173
+
+Code mẫu — server/index.js
+jsconst express = require('express')
+const http = require('http')
+const { Server } = require('socket.io')
+const cors = require('cors')
+require('dotenv').config()
+
+const app = express()
+const server = http.createServer(app)
+const io = new Server(server, {
+  cors: { origin: '*' }
+})
+
+app.use(cors())
+app.use(express.json())
+
+// Routes
+app.use('/api/auth',     require('./routes/auth'))
+app.use('/api/tables',   require('./routes/tables'))
+app.use('/api/sessions', require('./routes/sessions'))
+app.use('/api/sheets',   require('./routes/sheets'))
+
+// Socket.IO — đồng bộ realtime giữa các thiết bị
+io.on('connection', (socket) => {
+  console.log('Thiết bị kết nối:', socket.id)
+
+  socket.on('disconnect', () => {
+    console.log('Thiết bị ngắt kết nối:', socket.id)
+  })
+})
+
+// Export io để dùng trong routes
+app.set('io', io)
+
+server.listen(process.env.PORT || 4000, '0.0.0.0', () => {
+  console.log(`Server chạy tại http://localhost:${process.env.PORT || 4000}`)
+  console.log(`Thiết bị khác truy cập qua: http://<IP-máy-tính>:${process.env.PORT || 4000}`)
+})
+
+Code mẫu — Mở/Đóng bàn + emit Socket
+js// server/routes/sessions.js
+const { PrismaClient } = require('@prisma/client')
+const { appendSession } = require('../services/googleSheets')
+const { calcAmount } = require('../services/billing')
+const prisma = new PrismaClient()
+
+// Mở bàn
+router.post('/open', async (req, res) => {
+  const { tableId, userId, pricePerHour } = req.body
+  const io = req.app.get('io')
+
+  const user = await prisma.user.findUnique({ where: { id: userId } })
+
+  const updatedTable = await prisma.table.update({
+    where: { id: tableId },
+    data: {
+      status: 'active',
+      startTime: new Date(),
+      openedById: userId,
+      openedByName: user.name,
+    }
+  })
+
+  // Phát sự kiện tới TẤT CẢ thiết bị đang kết nối
+  io.emit('table:updated', updatedTable)
+
+  res.json({ success: true, table: updatedTable })
+})
+
+// Đóng bàn
+router.post('/close', async (req, res) => {
+  const { tableId, userId, pricePerHour } = req.body
+  const io = req.app.get('io')
+
+  const table = await prisma.table.findUnique({ where: { id: tableId } })
+  const user  = await prisma.user.findUnique({ where: { id: userId } })
+
+  const endTime = new Date()
+  const diffMs  = endTime - table.startTime
+  const durationMinutes = Math.round(diffMs / 1000 / 60)
+  const amount = Math.round((pricePerHour / 60) * durationMinutes)
+
+  // Lưu session
+  const session = await prisma.session.create({
+    data: {
+      tableId,
+      tableName:       table.name,
+      tableType:       table.type,
+      openedById:      table.openedById,
+      openedByName:    table.openedByName,
+      closedById:      userId,
+      closedByName:    user.name,
+      startTime:       table.startTime,
+      endTime,
+      durationMinutes,
+      amount,
+      pricePerHour,
+      date: endTime.toLocaleDateString('vi-VN'),
+    }
+  })
+
+  // Reset bàn về trống
+  const updatedTable = await prisma.table.update({
+    where: { id: tableId },
+    data: { status: 'empty', startTime: null, openedById: null, openedByName: null }
+  })
+
+  // Đồng bộ Google Sheets (không chặn response)
+  appendSession(session).then(() => {
+    prisma.session.update({
+      where: { id: session.id },
+      data: { syncedToSheets: true }
+    })
+  }).catch(err => console.error('Sheets sync lỗi:', err))
+
+  // Phát sự kiện tới tất cả thiết bị
+  io.emit('table:updated', updatedTable)
+  io.emit('session:created', session)
+
+  res.json({ success: true, session, table: updatedTable })
+})
+
+Code mẫu — useSocket.js (React)
+js// client/src/hooks/useSocket.js
+import { useEffect, useState } from 'react'
+import { io } from 'socket.io-client'
+
+const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:4000'
+const socket = io(SERVER_URL)
+
+export function useSocket() {
+  return socket
+}
+
+export function useTables() {
+  const [tables, setTables] = useState([])
+  const socket = useSocket()
+
+  useEffect(() => {
+    // Lấy danh sách bàn ban đầu
+    fetch(`${SERVER_URL}/api/tables`)
+      .then(r => r.json())
+      .then(setTables)
+
+    // Lắng nghe cập nhật realtime từ server
+    socket.on('table:updated', (updatedTable) => {
+      setTables(prev =>
+        prev.map(t => t.id === updatedTable.id ? updatedTable : t)
+      )
+    })
+
+    return () => socket.off('table:updated')
+  }, [])
+
+  return tables
+}
+
+Cách chạy trên mạng LAN (điện thoại dùng chung)
+bash# 1. Tìm IP của máy tính (Windows)
+ipconfig
+# → IPv4 Address: 192.168.1.10  (ví dụ)
+
+# 2. Điện thoại mở trình duyệt, vào địa chỉ:
+http://192.168.1.10:4000
+
+# 3. Đảm bảo server lắng nghe trên 0.0.0.0 (không phải localhost)
+# → server.listen(4000, '0.0.0.0', ...) ✅
+
+Checklist build theo thứ tự
+Cài đặt môi trường
+□ Cài Node.js 20+
+□ Cài PostgreSQL + tạo database billiards_db
+□ Cài dependencies: prisma, express, socket.io, googleapis, bcrypt, jsonwebtoken
+□ Chạy: npx prisma migrate dev --name init
+□ Seed dữ liệu mẫu: tài khoản quanly + nhanvien, 3 bàn mẫu
+
+Giai đoạn 1 — Backend cơ bản
+□ Express server chạy port 4000, listen 0.0.0.0
+□ Prisma kết nối PostgreSQL thành công
+□ API đăng nhập (POST /api/auth/login) trả JWT
+□ API danh sách bàn (GET /api/tables)
+□ API mở bàn (POST /api/sessions/open)
+□ API đóng bàn (POST /api/sessions/close)
+□ Socket.IO emit table:updated khi mở/đóng bàn
+
+Giai đoạn 2 — Frontend React
+□ Vite + Tailwind, proxy tới server port 4000
+□ LoginPage — form đăng nhập, lưu JWT vào localStorage
+□ DashboardPage — danh sách bàn, đồng hồ realtime
+□ TableCard — hiển thị trạng thái, timer, tiền, nút mở/đóng
+□ BillModal — hiện hóa đơn trước khi xác nhận đóng bàn
+□ Socket client lắng nghe table:updated → cập nhật UI ngay
+□ Bottom NavBar mobile (Bàn / Lịch sử / Cài đặt)
+
+Giai đoạn 3 — Google Sheets
+□ Tạo Service Account trên Google Cloud
+□ Lưu credentials vào .env
+□ Ghi dữ liệu vào Sheet sau mỗi lần đóng bàn
+□ Cột syncedToSheets trong DB để retry nếu lỗi mạng
+
+Giai đoạn 4 — Hoàn thiện
+□ Phân quyền: nhân viên không xem được trang Admin
+□ Cài giá theo giờ — lưu bảng Setting trong PostgreSQL
+□ Trang lịch sử — lọc theo ngày, theo nhân viên
+□ Test trên điện thoại qua WiFi LAN
+□ Tạo script khởi động 1 click (start.bat cho Windows)
+
+File start.bat (Windows — khởi động 1 click)
+bat@echo off
+echo Dang khoi dong he thong quan ly bi-a...
+cd /d %~dp0
+start "PostgreSQL" cmd /k "pg_ctl start -D C:\PostgreSQL\data"
+timeout /t 3
+start "Backend" cmd /k "node server/index.js"
+timeout /t 2
+start "Frontend" cmd /k "cd client && npm run dev"
+echo.
+echo He thong da khoi dong!
+echo Truy cap: http://localhost:5173
+pause
