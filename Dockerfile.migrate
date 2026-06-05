@@ -8,7 +8,7 @@ COPY package.json pnpm-workspace.yaml pnpm-lock.yaml .npmrc tsconfig.base.json t
 COPY lib/ lib/
 COPY scripts/ scripts/
 
-RUN pnpm install --frozen-lockfile --ignore-scripts
+RUN pnpm install --no-frozen-lockfile --ignore-scripts
 
 COPY scripts/docker-migrate.sh /docker-migrate.sh
 RUN chmod +x /docker-migrate.sh

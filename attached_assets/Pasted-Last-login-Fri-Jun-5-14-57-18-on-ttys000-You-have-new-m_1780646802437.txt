@@ -1,0 +1,156 @@
+Last login: Fri Jun  5 14:57:18 on ttys000
+You have new mail.
+minwedding@DRKdf BI-A % bash setup.sh
+
+╔════════════════════════════════════════╗
+║     QUẢN LÝ BÀN BI-A — Docker Setup   ║
+╚════════════════════════════════════════╝
+
+
+▶ Kiểm tra Docker Desktop...
+✅ Docker 29.1.5 đang chạy.
+✅ Docker Compose OK.
+
+▶ Cấu hình môi trường...
+✅ Đã tạo JWT_SECRET ngẫu nhiên.
+⚠️  File .env đã được tạo. Bạn có thể chỉnh APP_PORT nếu muốn đổi cổng.
+
+▶ Dừng các container cũ (nếu có)...
+✅ Đã dừng.
+
+▶ Build Docker images (lần đầu mất 3–5 phút)...
+[+] Building 13.5s (31/44)                                                      
+ => [internal] load local bake definitions                                 0.0s
+ => => reading from stdin 1.60kB                                           0.0s
+ => [migrate internal] load build definition from Dockerfile.migrate       0.0s
+ => => transferring dockerfile: 492B                                       0.0s
+ => [frontend internal] load build definition from Dockerfile.frontend     0.0s
+ => => transferring dockerfile: 976B                                       0.0s
+ => [api internal] load build definition from Dockerfile.api               0.0s
+ => => transferring dockerfile: 1.28kB                                     0.0s
+ => [frontend internal] load metadata for docker.io/library/nginx:alpine   2.5s
+ => [migrate internal] load metadata for docker.io/library/node:24-alpine  1.3s
+ => [frontend internal] load .dockerignore                                 0.0s
+ => => transferring context: 174B                                          0.0s
+ => [api internal] load build context                                      0.0s
+ => => transferring context: 11.09kB                                       0.0s
+ => [migrate base 1/3] FROM docker.io/library/node:24-alpine@sha256:2bdb6  2.0s
+ => => resolve docker.io/library/node:24-alpine@sha256:2bdb65ed1dab192432  0.0s
+ => => sha256:94608041901381d610a9dae20a814b97ba1ca8dd569 1.26MB / 1.26MB  0.6s
+ => => sha256:f0736842e9d3ece34cfad47858392c31335fc90c9 52.84MB / 52.84MB  1.4s
+ => => sha256:d288096416163ccf3543748d1b6d49f3ed767b35ac3354c 444B / 444B  0.3s
+ => => sha256:d17f077ada118cc762df373ff803592abf2dfa3ddaf 4.20MB / 4.20MB  1.0s
+ => => extracting sha256:d17f077ada118cc762df373ff803592abf2dfa3ddafaa738  0.1s
+ => => extracting sha256:f0736842e9d3ece34cfad47858392c31335fc90c93cfb549  0.5s
+ => => extracting sha256:94608041901381d610a9dae20a814b97ba1ca8dd569ba4a4  0.0s
+ => => extracting sha256:d288096416163ccf3543748d1b6d49f3ed767b35ac3354c2  0.0s
+ => [migrate internal] load build context                                  0.0s
+ => => transferring context: 13.18kB                                       0.0s
+ => [frontend internal] load build context                                 0.0s
+ => => transferring context: 299.30kB                                      0.0s
+ => [frontend runner 1/3] FROM docker.io/library/nginx:alpine@sha256:8b1e  1.5s
+ => => resolve docker.io/library/nginx:alpine@sha256:8b1e78743a03dbb2c951  0.0s
+ => => sha256:42394e2ad482f12a16d4ab961263041498e14296c 19.73MB / 19.73MB  0.5s
+ => => sha256:92c8eaa0c5e2811db8e51fe7f7b46319d9262ceebd1 1.40kB / 1.40kB  0.5s
+ => => sha256:79429faec0285d972d39bba343882b287ac08c1e776 1.21kB / 1.21kB  0.8s
+ => => sha256:58dfa199cc5789b16341ebe3ed56e76da7ff322bb3082e5 404B / 404B  0.6s
+ => => sha256:8dd0c1727b8e6406c345db087efe55647e6859013a66c6b 956B / 956B  0.4s
+ => => sha256:29fd1853467817272c4f31287383a55bf275577631264f1 627B / 627B  0.5s
+ => => sha256:a0a8eb1892ac4132988ce4aac8c4ff3599487a01129 1.90MB / 1.90MB  0.3s
+ => => extracting sha256:a0a8eb1892ac4132988ce4aac8c4ff3599487a01129511f6  0.0s
+ => => extracting sha256:29fd1853467817272c4f31287383a55bf275577631264f19  0.0s
+ => => extracting sha256:8dd0c1727b8e6406c345db087efe55647e6859013a66c6b5  0.0s
+ => => extracting sha256:58dfa199cc5789b16341ebe3ed56e76da7ff322bb3082e5d  0.0s
+ => => extracting sha256:79429faec0285d972d39bba343882b287ac08c1e7766951e  0.0s
+ => => extracting sha256:92c8eaa0c5e2811db8e51fe7f7b46319d9262ceebd17b874  0.0s
+ => => extracting sha256:42394e2ad482f12a16d4ab961263041498e14296c323175c  0.2s
+ => [migrate base 2/3] RUN corepack enable && corepack prepare pnpm@lates  1.1s
+ => [api runner 2/4] WORKDIR /app                                          0.1s
+ => CANCELED [api base 3/3] RUN apk add --no-cache python3 make g++        8.7s
+ => [frontend deps 1/6] WORKDIR /app                                       0.0s
+ => [migrate  3/10] RUN apk add --no-cache postgresql-client               1.2s
+ => [frontend deps 2/6] COPY package.json pnpm-workspace.yaml pnpm-lock.y  0.0s
+ => [frontend deps 3/6] COPY lib/ lib/                                     0.0s
+ => [frontend deps 4/6] COPY artifacts/billiards/ artifacts/billiards/     0.0s
+ => [frontend deps 5/6] RUN mkdir -p attached_assets                       0.1s
+ => [frontend deps 6/6] RUN pnpm install --frozen-lockfile --ignore-scrip  8.0s
+ => [migrate  4/10] WORKDIR /app                                           0.0s
+ => [migrate  5/10] COPY package.json pnpm-workspace.yaml pnpm-lock.yaml   0.0s
+ => [migrate  6/10] COPY lib/ lib/                                         0.0s
+ => [migrate  7/10] COPY scripts/ scripts/                                 0.0s
+ => [migrate  8/10] RUN pnpm install --frozen-lockfile --ignore-scripts    6.8s
+ => [migrate  9/10] COPY scripts/docker-migrate.sh /docker-migrate.sh      0.1s
+ => [migrate 10/10] RUN chmod +x /docker-migrate.sh                        0.2s
+ => ERROR [frontend builder 1/1] RUN PORT=80 BASE_PATH=/ pnpm --filter @w  0.6s
+ => CANCELED [migrate] exporting to image                                  0.5s
+ => => exporting layers                                                    0.5s
+------
+ > [frontend builder 1/1] RUN PORT=80 BASE_PATH=/ pnpm --filter @workspace/billiards run build:
+0.464 $ vite build --config vite.config.ts
+0.538 /app/node_modules/.pnpm/rollup@4.60.3/node_modules/rollup/dist/native.js:115
+0.538 		throw new Error(
+0.538 		      ^
+0.538 
+0.538 Error: Cannot find module @rollup/rollup-linux-arm64-musl. npm has a bug related to optional dependencies (https://github.com/npm/cli/issues/4828). Please try `npm i` again after removing both package-lock.json and node_modules directory.
+0.538     at requireWithFriendlyError (/app/node_modules/.pnpm/rollup@4.60.3/node_modules/rollup/dist/native.js:115:9)
+0.538     at Object.<anonymous> (/app/node_modules/.pnpm/rollup@4.60.3/node_modules/rollup/dist/native.js:124:76)
+0.538     at Module._compile (node:internal/modules/cjs/loader:1854:14)
+0.538     at Object..js (node:internal/modules/cjs/loader:1985:10)
+0.538     at Module.load (node:internal/modules/cjs/loader:1577:32)
+0.538     at Module._load (node:internal/modules/cjs/loader:1379:12)
+0.538     at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+0.538     at loadCJSModuleWithModuleLoad (node:internal/modules/esm/translators:326:3)
+0.538     at ModuleWrap.<anonymous> (node:internal/modules/esm/translators:231:7)
+0.538     at ModuleJob.run (node:internal/modules/esm/module_job:439:25) {
+0.538   [cause]: Error: Cannot find module '@rollup/rollup-linux-arm64-musl'
+0.538   Require stack:
+0.538   - /app/node_modules/.pnpm/rollup@4.60.3/node_modules/rollup/dist/native.js
+0.538       at Module._resolveFilename (node:internal/modules/cjs/loader:1500:15)
+0.538       at wrapResolveFilename (node:internal/modules/cjs/loader:1071:27)
+0.538       at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1095:10)
+0.538       at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1116:12)
+0.538       at Module._load (node:internal/modules/cjs/loader:1285:25)
+0.538       at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+0.538       at Module.require (node:internal/modules/cjs/loader:1600:12)
+0.538       at require (node:internal/modules/helpers:153:16)
+0.538       at requireWithFriendlyError (/app/node_modules/.pnpm/rollup@4.60.3/node_modules/rollup/dist/native.js:97:10)
+0.538       at Object.<anonymous> (/app/node_modules/.pnpm/rollup@4.60.3/node_modules/rollup/dist/native.js:124:76) {
+0.538     code: 'MODULE_NOT_FOUND',
+0.538     requireStack: [
+0.538       '/app/node_modules/.pnpm/rollup@4.60.3/node_modules/rollup/dist/native.js'
+0.538     ]
+0.538   }
+0.538 }
+0.538 
+0.538 Node.js v24.16.0
+0.554 /app/artifacts/billiards:
+0.554 [ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @workspace/billiards@0.0.0 build: `vite build --config vite.config.ts`
+0.554 Exit status 1
+------
+[+] build 0/3
+ ⠙ Image bi-a-migrate  Building                                           13.6s 
+ ⠙ Image bi-a-api      Building                                           13.6s 
+ ⠙ Image bi-a-frontend Building                                           13.6s 
+Dockerfile.frontend:15
+
+--------------------
+
+  13 |     # ── Build Vite → dist/public/ ───────────────
+
+  14 |     FROM deps AS builder
+
+  15 | >>> RUN PORT=80 BASE_PATH=/ pnpm --filter @workspace/billiards run build
+
+  16 |     
+
+  17 |     # ── Image nginx cuối cùng ───────────────────
+
+--------------------
+
+target frontend: failed to solve: process "/bin/sh -c PORT=80 BASE_PATH=/ pnpm --filter @workspace/billiards run build" did not complete successfully: exit code: 1
+
+
+
+View build details: docker-desktop://dashboard/build/default/default/s084172iwn8jlck0e1dimsqad
+
+minwedding@DRKdf BI-A % 
