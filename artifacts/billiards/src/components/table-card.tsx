@@ -4,15 +4,17 @@ import { formatCurrency, formatDuration, calculateDuration } from "../lib/format
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
-import { Clock, Play, Square } from "lucide-react";
+import { Clock, Play, Square, ShoppingBag } from "lucide-react";
 
 interface TableCardProps {
   table: Table;
   onOpen: (table: Table, price: number) => void;
   onClose: (table: Table) => void;
+  onAddProducts?: (table: Table) => void;
+  pendingItemsCount?: number;
 }
 
-export function TableCard({ table, onOpen, onClose }: TableCardProps) {
+export function TableCard({ table, onOpen, onClose, onAddProducts, pendingItemsCount = 0 }: TableCardProps) {
   const { data: settings } = useGetSettings();
   const isActive = table.status === "active";
   
@@ -83,16 +85,31 @@ export function TableCard({ table, onOpen, onClose }: TableCardProps) {
         )}
       </div>
 
-      <div className="p-4 pt-0">
+      <div className="p-4 pt-0 flex flex-col gap-2">
         {isActive ? (
-          <Button 
-            variant="destructive" 
-            className="w-full font-bold uppercase tracking-wider h-12" 
-            onClick={() => onClose(table)}
-          >
-            <Square className="h-5 w-5 mr-2 fill-current" />
-            Đóng Bàn
-          </Button>
+          <>
+            <Button
+              variant="outline"
+              className="w-full font-bold uppercase tracking-wider h-10 border-primary/30 text-primary hover:bg-primary/10 relative"
+              onClick={() => onAddProducts?.(table)}
+            >
+              <ShoppingBag className="h-4 w-4 mr-2" />
+              Thêm Sản Phẩm
+              {pendingItemsCount > 0 && (
+                <span className="absolute top-1.5 right-2 bg-primary text-primary-foreground text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
+                  {pendingItemsCount}
+                </span>
+              )}
+            </Button>
+            <Button 
+              variant="destructive" 
+              className="w-full font-bold uppercase tracking-wider h-12" 
+              onClick={() => onClose(table)}
+            >
+              <Square className="h-5 w-5 mr-2 fill-current" />
+              Đóng Bàn
+            </Button>
+          </>
         ) : (
           <Button 
             className="w-full font-bold uppercase tracking-wider h-12" 

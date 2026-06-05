@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 import { useGetSettings } from "@workspace/api-client-react";
 import { Plus, Trash2 } from "lucide-react";
 
-interface ExtraItem {
+export interface ExtraItem {
   name: string;
   price: number;
 }
@@ -19,9 +19,11 @@ interface CloseTableModalProps {
   isOpen: boolean;
   onClose: () => void;
   table: Table | null;
+  initialExtraItems?: ExtraItem[];
+  onClosed?: () => void;
 }
 
-export function CloseTableModal({ isOpen, onClose, table }: CloseTableModalProps) {
+export function CloseTableModal({ isOpen, onClose, table, initialExtraItems = [], onClosed }: CloseTableModalProps) {
   const { currentUser } = useAuth();
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -49,8 +51,8 @@ export function CloseTableModal({ isOpen, onClose, table }: CloseTableModalProps
   }, [isOpen, table]);
 
   useEffect(() => {
-    if (!isOpen) {
-      setExtraItems([]);
+    if (isOpen) {
+      setExtraItems(initialExtraItems);
       setNewItemName("");
       setNewItemPrice("");
     }
@@ -82,6 +84,7 @@ export function CloseTableModal({ isOpen, onClose, table }: CloseTableModalProps
           title: "Thành công",
           description: `Đã đóng ${table?.name}. Tổng tiền: ${formatCurrency(data.session.amount || 0)}`,
         });
+        onClosed?.();
         onClose();
       },
       onError: () => {
@@ -141,7 +144,7 @@ export function CloseTableModal({ isOpen, onClose, table }: CloseTableModalProps
 
             {/* Extra items */}
             <div className="space-y-2">
-              <p className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Dịch vụ thêm</p>
+              <p className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Sản phẩm / Dịch vụ</p>
 
               {extraItems.map((item, idx) => (
                 <div key={idx} className="flex items-center justify-between gap-2 px-3 py-2 bg-muted/20 rounded-md border border-border/50">

@@ -5,6 +5,7 @@ import { TableCard } from "../components/table-card";
 import { formatCurrency, formatDuration } from "../lib/format";
 import { OpenTableModal } from "../components/open-table-modal";
 import { CloseTableModal } from "../components/close-table-modal";
+import { AddProductsModal, ExtraItem } from "../components/add-products-modal";
 import { Card, CardContent } from "../components/ui/card";
 import { Activity, Coins, Clock } from "lucide-react";
 import { useSocketEvents } from "../lib/socket";
@@ -37,6 +38,14 @@ export default function Dashboard() {
     table: null,
   });
 
+  const [addProductsModalState, setAddProductsModalState] = useState<{ isOpen: boolean; table: Table | null }>({
+    isOpen: false,
+    table: null,
+  });
+
+  // Map of tableId → pending extra items added during the session
+  const [pendingItems, setPendingItems] = useState<Record<string, ExtraItem[]>>({});
+
   const handleOpenClick = (table: Table, price: number) => {
     setOpenModalState({ isOpen: true, table, price });
   };
@@ -44,6 +53,25 @@ export default function Dashboard() {
   const handleCloseClick = (table: Table) => {
     setCloseModalState({ isOpen: true, table });
   };
+
+  const handleAddProductsClick = (table: Table) => {
+    setAddProductsModalState({ isOpen: true, table });
+  };
+
+  const handleProductsChange = (tableId: string, items: ExtraItem[]) => {
+    setPendingItems((prev) => ({ ...prev, [tableId]: items }));
+  };
+
+  const handleSessionClosed = (tableId: string) => {
+    setPendingItems((prev) => {
+      const next = { ...prev };
+      delete next[tableId];
+      return next;
+    });
+  };
+
+  const activeTable = addProductsModalState.table;
+  const closeTable = closeModalState.table;
 
   return (
     <Layout>
@@ -97,7 +125,9 @@ export default function Dashboard() {
               key={table.id} 
               table={table} 
               onOpen={handleOpenClick} 
-              onClose={handleCloseClick} 
+              onClose={handleCloseClick}
+              onAddProducts={handleAddProductsClick}
+              pendingItemsCount={pendingItems[table.id]?.length ?? 0}
             />
           ))}
         </div>
@@ -113,7 +143,17 @@ export default function Dashboard() {
       <CloseTableModal 
         isOpen={closeModalState.isOpen}
         onClose={() => setCloseModalState((prev) => ({ ...prev, isOpen: false }))}
-        table={closeModalState.table}
+        table={closeTable}
+        initialExtraItems={closeTable ? (pendingItems[closeTable.id] ?? []) : []}
+        onClosed={() => closeTable && handleSessionClosed(closeTable.id)}
+      />
+
+      <AddProductsModal
+        isOpen={addProductsModalState.isOpen}
+        onClose={() => setAddProductsModalState((prev) => ({ ...prev, isOpen: false }))}
+        table={activeTable}
+        items={activeTable ? (pendingItems[activeTable.id] ?? []) : []}
+        onItemsChange={(items) => activeTable && handleProductsChange(activeTable.id, items)}
       />
     </Layout>
   );
