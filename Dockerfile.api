@@ -5,10 +5,13 @@ RUN apk add --no-cache python3 make g++
 # ── Cài dependencies ────────────────────────
 FROM base AS deps
 WORKDIR /app
-COPY package.json pnpm-workspace.yaml pnpm-lock.yaml .npmrc tsconfig.base.json tsconfig.json ./
+COPY package.json pnpm-workspace.docker.yaml pnpm-lock.yaml .npmrc tsconfig.base.json tsconfig.json ./
 COPY lib/ lib/
 COPY artifacts/api-server/ artifacts/api-server/
-RUN rm -f pnpm-lock.yaml && pnpm install --ignore-scripts
+# Dùng workspace config dành riêng cho Docker (không loại trừ binary ARM64/x64)
+RUN mv pnpm-workspace.docker.yaml pnpm-workspace.yaml && \
+    rm -f pnpm-lock.yaml && \
+    pnpm install --ignore-scripts
 RUN pnpm rebuild bcrypt
 
 # ── Build TypeScript → dist/ ────────────────

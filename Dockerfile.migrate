@@ -4,11 +4,14 @@ RUN apk add --no-cache postgresql-client
 
 WORKDIR /app
 
-COPY package.json pnpm-workspace.yaml pnpm-lock.yaml .npmrc tsconfig.base.json tsconfig.json ./
+COPY package.json pnpm-workspace.docker.yaml pnpm-lock.yaml .npmrc tsconfig.base.json tsconfig.json ./
 COPY lib/ lib/
 COPY scripts/ scripts/
 
-RUN rm -f pnpm-lock.yaml && pnpm install --ignore-scripts
+# Dùng workspace config dành riêng cho Docker (không loại trừ binary ARM64/x64)
+RUN mv pnpm-workspace.docker.yaml pnpm-workspace.yaml && \
+    rm -f pnpm-lock.yaml && \
+    pnpm install --ignore-scripts
 
 COPY scripts/docker-migrate.sh /docker-migrate.sh
 RUN chmod +x /docker-migrate.sh
