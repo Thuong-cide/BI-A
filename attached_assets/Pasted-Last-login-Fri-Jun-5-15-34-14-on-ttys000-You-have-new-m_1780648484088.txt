@@ -1,0 +1,122 @@
+Last login: Fri Jun  5 15:34:14 on ttys000
+You have new mail.
+minwedding@DRKdf BI-A 2 % bash setup.sh
+
+╔════════════════════════════════════════╗
+║     QUẢN LÝ BÀN BI-A — Docker Setup   ║
+╚════════════════════════════════════════╝
+
+
+▶ Kiểm tra Docker Desktop...
+✅ Docker 29.1.5 đang chạy.
+✅ Docker Compose OK.
+
+▶ Cấu hình môi trường...
+✅ File .env đã tồn tại — giữ nguyên.
+
+▶ Dừng các container cũ (nếu có)...
+✅ Đã dừng.
+
+▶ Build Docker images (lần đầu mất 3–5 phút)...
+[+] Building 8.1s (40/45)                                                       
+ => [internal] load local bake definitions                                 0.0s
+ => => reading from stdin 1.62kB                                           0.0s
+ => [api internal] load build definition from Dockerfile.api               0.0s
+ => => transferring dockerfile: 1.46kB                                     0.0s
+ => [frontend internal] load build definition from Dockerfile.frontend     0.0s
+ => => transferring dockerfile: 1.14kB                                     0.0s
+ => [migrate internal] load build definition from Dockerfile.migrate       0.0s
+ => => transferring dockerfile: 658B                                       0.0s
+ => [migrate internal] load metadata for docker.io/library/node:24-alpine  0.4s
+ => [frontend internal] load metadata for docker.io/library/nginx:alpine   0.9s
+ => [frontend internal] load .dockerignore                                 0.0s
+ => => transferring context: 174B                                          0.0s
+ => [frontend  1/10] FROM docker.io/library/node:24-alpine@sha256:2bdb65e  0.0s
+ => => resolve docker.io/library/node:24-alpine@sha256:2bdb65ed1dab192432  0.0s
+ => [migrate internal] load build context                                  0.0s
+ => => transferring context: 3.67kB                                        0.0s
+ => [api internal] load build context                                      0.0s
+ => => transferring context: 34.56kB                                       0.0s
+ => CACHED [api runner 2/4] WORKDIR /app                                   0.0s
+ => CACHED [frontend  2/10] RUN corepack enable && corepack prepare pnpm@  0.0s
+ => CACHED [migrate  3/10] RUN apk add --no-cache postgresql-client        0.0s
+ => CACHED [migrate  4/10] WORKDIR /app                                    0.0s
+ => CACHED [migrate  5/10] COPY package.json pnpm-workspace.docker.yaml p  0.0s
+ => CACHED [migrate  6/10] COPY lib/ lib/                                  0.0s
+ => CACHED [migrate  7/10] COPY scripts/ scripts/                          0.0s
+ => CACHED [migrate  8/10] RUN mv pnpm-workspace.docker.yaml pnpm-workspa  0.0s
+ => CACHED [migrate  9/10] COPY scripts/docker-migrate.sh /docker-migrate  0.0s
+ => CACHED [migrate 10/10] RUN chmod +x /docker-migrate.sh                 0.0s
+ => CACHED [api base 3/3] RUN apk add --no-cache python3 make g++          0.0s
+ => CACHED [api deps 1/6] WORKDIR /app                                     0.0s
+ => CACHED [api deps 2/6] COPY package.json pnpm-workspace.docker.yaml pn  0.0s
+ => CACHED [api deps 3/6] COPY lib/ lib/                                   0.0s
+ => CACHED [api deps 4/6] COPY artifacts/api-server/ artifacts/api-server  0.0s
+ => CACHED [api deps 5/6] RUN mv pnpm-workspace.docker.yaml pnpm-workspac  0.0s
+ => CACHED [api deps 6/6] RUN pnpm rebuild bcrypt                          0.0s
+ => CACHED [api builder 1/1] RUN pnpm --filter @workspace/api-server run   0.0s
+ => CACHED [api deploy 1/2] COPY --from=builder /app/artifacts/api-server  0.0s
+ => ERROR [api deploy 2/2] RUN pnpm deploy --filter @workspace/api-server  7.2s
+ => [migrate] exporting to image                                           2.1s
+ => => exporting layers                                                    0.0s
+ => => exporting manifest sha256:57bdcda8156801589fefc66f2ee72acb52919a44  0.0s
+ => => exporting config sha256:f1b186051562dd6efecbfe1daf3ef53cb6bcd395ee  0.0s
+ => => exporting attestation manifest sha256:53269fcdc2819a14876e66f1e059  0.0s
+ => => exporting manifest list sha256:3f7223379430d142194c7f3281927f71331  0.0s
+ => => naming to docker.io/library/bi-a2-migrate:latest                    0.0s
+ => => unpacking to docker.io/library/bi-a2-migrate:latest                 2.0s
+ => [frontend internal] load build context                                 0.0s
+ => => transferring context: 293.15kB                                      0.0s
+ => CACHED [frontend runner 1/3] FROM docker.io/library/nginx:alpine@sha2  0.0s
+ => => resolve docker.io/library/nginx:alpine@sha256:8b1e78743a03dbb2c951  0.0s
+ => CACHED [frontend deps 1/6] WORKDIR /app                                0.0s
+ => CACHED [frontend deps 2/6] COPY package.json pnpm-workspace.docker.ya  0.0s
+ => CACHED [frontend deps 3/6] COPY lib/ lib/                              0.0s
+ => CACHED [frontend deps 4/6] COPY artifacts/billiards/ artifacts/billia  0.0s
+ => CACHED [frontend deps 5/6] RUN mkdir -p attached_assets                0.0s
+ => CANCELED [frontend deps 6/6] RUN mv pnpm-workspace.docker.yaml pnpm-w  6.9s
+ => [migrate] resolving provenance for metadata file                       0.0s
+------
+ > [api deploy 2/2] RUN pnpm deploy --filter @workspace/api-server --prod /app/deploy --legacy:
+0.553 [WARN] Shared workspace lockfile detected but configuration forces legacy deploy implementation.
+0.604 Packages are copied from the content-addressable store to the virtual store.
+0.604   Content-addressable store is at: /root/.local/share/pnpm/store/v11
+0.604   Virtual store is at:             deploy/node_modules/.pnpm
+0.641 Progress: resolved 1, reused 0, downloaded 0, added 0
+1.318 [WARN] 1 deprecated subdependencies found: node-domexception@1.0.0
+1.318 Progress: resolved 322, reused 0, downloaded 0, added 0, done
+1.320 [WARN] Issues with peer dependencies found. Run "pnpm peers check" to list them.
+1.352 .                                        | +156 ++++++++++++++++
+6.903 . preinstall$ sh -c 'rm -f package-lock.json yarn.lock; case "$npm_config_user_agent" in pnpm/*) ;; *) echo "Use pnpm instead" >&2; exit 1 ;; esac'
+6.909 . preinstall: Done
+6.956 [ERR_PNPM_IGNORED_BUILDS] Ignored build scripts: bcrypt@6.0.0
+6.956 
+6.956 Run "pnpm approve-builds" to pick which dependencies should be allowed to run scripts.
+------
+[+] build 0/3
+ ⠙ Image bi-a2-migrate  Building                                           8.1s 
+ ⠙ Image bi-a2-api      Building                                           8.1s 
+ ⠙ Image bi-a2-frontend Building                                           8.1s 
+Dockerfile.api:24
+
+--------------------
+
+  22 |     FROM deps AS deploy
+
+  23 |     COPY --from=builder /app/artifacts/api-server/dist /app/artifacts/api-server/dist
+
+  24 | >>> RUN pnpm deploy --filter @workspace/api-server --prod /app/deploy --legacy
+
+  25 |     
+
+  26 |     # ── Image cuối cùng (nhỏ gọn) ───────────────
+
+--------------------
+
+target api: failed to solve: process "/bin/sh -c pnpm deploy --filter @workspace/api-server --prod /app/deploy --legacy" did not complete successfully: exit code: 1
+
+
+
+View build details: docker-desktop://dashboard/build/default/default/q0cjva8kx0uerk68v5s9pkuzz
+
+minwedding@DRKdf BI-A 2 % 

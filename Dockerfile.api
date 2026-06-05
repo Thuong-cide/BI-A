@@ -18,16 +18,12 @@ RUN pnpm rebuild bcrypt
 FROM deps AS builder
 RUN pnpm --filter @workspace/api-server run build
 
-# ── Tạo production deploy (resolve symlinks) ─
-FROM deps AS deploy
-COPY --from=builder /app/artifacts/api-server/dist /app/artifacts/api-server/dist
-RUN pnpm deploy --filter @workspace/api-server --prod /app/deploy --legacy
-
-# ── Image cuối cùng (nhỏ gọn) ───────────────
+# ── Image cuối cùng ─────────────────────────
 FROM node:24-alpine AS runner
 WORKDIR /app
 
-COPY --from=deploy /app/deploy/node_modules ./node_modules
+# Copy node_modules đã có bcrypt được build sẵn
+COPY --from=deps /app/node_modules ./node_modules
 COPY --from=builder /app/artifacts/api-server/dist ./dist
 
 ENV NODE_ENV=production
