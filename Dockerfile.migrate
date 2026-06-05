@@ -1,0 +1,16 @@
+FROM node:24-alpine AS base
+RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN apk add --no-cache postgresql-client
+
+WORKDIR /app
+
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml .npmrc tsconfig.base.json tsconfig.json ./
+COPY lib/ lib/
+COPY scripts/ scripts/
+
+RUN pnpm install --frozen-lockfile --ignore-scripts
+
+COPY scripts/docker-migrate.sh /docker-migrate.sh
+RUN chmod +x /docker-migrate.sh
+
+CMD ["/docker-migrate.sh"]

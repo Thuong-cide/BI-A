@@ -1,0 +1,34 @@
+FROM node:24-alpine AS base
+RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN apk add --no-cache python3 make g++
+
+# ── Cài dependencies ────────────────────────
+FROM base AS deps
+WORKDIR /app
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml .npmrc tsconfig.base.json tsconfig.json ./
+COPY lib/ lib/
+COPY artifacts/api-server/ artifacts/api-server/
+RUN pnpm install --frozen-lockfile --ignore-scripts
+RUN pnpm rebuild bcrypt
+
+# ── Build TypeScript → dist/ ────────────────
+FROM deps AS builder
+RUN pnpm --filter @workspace/api-server run build
+
+# ── Tạo production deploy (resolve symlinks) ─
+FROM deps AS deploy
+COPY --from=builder /app/artifacts/api-server/dist /app/artifacts/api-server/dist
+RUN pnpm deploy --filter @workspace/api-server --prod /app/deploy
+
+# ── Image cuối cùng (nhỏ gọn) ───────────────
+FROM node:24-alpine AS runner
+WORKDIR /app
+
+COPY --from=deploy /app/deploy/node_modules ./node_modules
+COPY --from=builder /app/artifacts/api-server/dist ./dist
+
+ENV NODE_ENV=production
+ENV PORT=8080
+EXPOSE 8080
+
+CMD ["node", "--enable-source-maps", "./dist/index.mjs"]
