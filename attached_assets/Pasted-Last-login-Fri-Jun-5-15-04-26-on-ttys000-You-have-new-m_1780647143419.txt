@@ -1,0 +1,141 @@
+Last login: Fri Jun  5 15:04:26 on ttys000
+You have new mail.
+minwedding@DRKdf BI-A % bash setup.sh
+
+╔════════════════════════════════════════╗
+║     QUẢN LÝ BÀN BI-A — Docker Setup   ║
+╚════════════════════════════════════════╝
+
+
+▶ Kiểm tra Docker Desktop...
+✅ Docker 29.1.5 đang chạy.
+✅ Docker Compose OK.
+
+▶ Cấu hình môi trường...
+✅ Đã tạo JWT_SECRET ngẫu nhiên.
+⚠️  File .env đã được tạo. Bạn có thể chỉnh APP_PORT nếu muốn đổi cổng.
+
+▶ Dừng các container cũ (nếu có)...
+✅ Đã dừng.
+
+▶ Build Docker images (lần đầu mất 3–5 phút)...
+[+] Building 15.1s (38/44)                                                      
+ => [internal] load local bake definitions                                 0.0s
+ => => reading from stdin 1.60kB                                           0.0s
+ => [frontend internal] load build definition from Dockerfile.frontend     0.0s
+ => => transferring dockerfile: 979B                                       0.0s
+ => [api internal] load build definition from Dockerfile.api               0.0s
+ => => transferring dockerfile: 1.29kB                                     0.0s
+ => [migrate internal] load build definition from Dockerfile.migrate       0.0s
+ => => transferring dockerfile: 495B                                       0.0s
+ => [frontend internal] load metadata for docker.io/library/nginx:alpine   1.4s
+ => [migrate internal] load metadata for docker.io/library/node:24-alpine  1.3s
+ => [frontend internal] load .dockerignore                                 0.0s
+ => => transferring context: 174B                                          0.0s
+ => [frontend base 1/3] FROM docker.io/library/node:24-alpine@sha256:2bdb  0.0s
+ => => resolve docker.io/library/node:24-alpine@sha256:2bdb65ed1dab192432  0.0s
+ => [api internal] load build context                                      0.0s
+ => => transferring context: 40.71kB                                       0.0s
+ => [migrate internal] load build context                                  0.0s
+ => => transferring context: 13.18kB                                       0.0s
+ => CACHED [frontend base 2/3] RUN corepack enable && corepack prepare pn  0.0s
+ => [api base 3/3] RUN apk add --no-cache python3 make g++                 3.9s
+ => CACHED [api runner 2/4] WORKDIR /app                                   0.0s
+ => CACHED [migrate  3/10] RUN apk add --no-cache postgresql-client        0.0s
+ => CACHED [migrate  4/10] WORKDIR /app                                    0.0s
+ => CACHED [migrate  5/10] COPY package.json pnpm-workspace.yaml pnpm-loc  0.0s
+ => CACHED [migrate  6/10] COPY lib/ lib/                                  0.0s
+ => CACHED [migrate  7/10] COPY scripts/ scripts/                          0.0s
+ => [migrate  8/10] RUN pnpm install --no-frozen-lockfile --ignore-script  8.2s
+ => CACHED [frontend runner 1/3] FROM docker.io/library/nginx:alpine@sha2  0.0s
+ => => resolve docker.io/library/nginx:alpine@sha256:8b1e78743a03dbb2c951  0.0s
+ => [frontend internal] load build context                                 0.0s
+ => => transferring context: 15.59kB                                       0.0s
+ => CACHED [frontend deps 1/6] WORKDIR /app                                0.0s
+ => CACHED [frontend deps 2/6] COPY package.json pnpm-workspace.yaml pnpm  0.0s
+ => CACHED [frontend deps 3/6] COPY lib/ lib/                              0.0s
+ => CACHED [frontend deps 4/6] COPY artifacts/billiards/ artifacts/billia  0.0s
+ => CACHED [frontend deps 5/6] RUN mkdir -p attached_assets                0.0s
+ => [frontend deps 6/6] RUN pnpm install --no-frozen-lockfile --ignore-s  12.2s
+ => [api deps 1/6] WORKDIR /app                                            0.1s
+ => [api deps 2/6] COPY package.json pnpm-workspace.yaml pnpm-lock.yaml .  0.0s
+ => [api deps 3/6] COPY lib/ lib/                                          0.0s
+ => [api deps 4/6] COPY artifacts/api-server/ artifacts/api-server/        0.0s
+ => [api deps 5/6] RUN pnpm install --no-frozen-lockfile --ignore-scripts  8.4s
+ => [migrate  9/10] COPY scripts/docker-migrate.sh /docker-migrate.sh      0.1s
+ => [migrate 10/10] RUN chmod +x /docker-migrate.sh                        0.2s
+ => CANCELED [migrate] exporting to image                                  4.8s
+ => => exporting layers                                                    4.8s
+ => ERROR [frontend builder 1/1] RUN PORT=80 BASE_PATH=/ pnpm --filter @w  1.0s
+ => [api deps 6/6] RUN pnpm rebuild bcrypt                                 0.7s
+ => CANCELED [api builder 1/1] RUN pnpm --filter @workspace/api-server ru  0.3s
+------
+ > [frontend builder 1/1] RUN PORT=80 BASE_PATH=/ pnpm --filter @workspace/billiards run build:
+0.774 $ vite build --config vite.config.ts
+0.923 /app/node_modules/.pnpm/rollup@4.60.3/node_modules/rollup/dist/native.js:115
+0.923 		throw new Error(
+0.923 		      ^
+0.923 
+0.923 Error: Cannot find module @rollup/rollup-linux-arm64-musl. npm has a bug related to optional dependencies (https://github.com/npm/cli/issues/4828). Please try `npm i` again after removing both package-lock.json and node_modules directory.
+0.923     at requireWithFriendlyError (/app/node_modules/.pnpm/rollup@4.60.3/node_modules/rollup/dist/native.js:115:9)
+0.923     at Object.<anonymous> (/app/node_modules/.pnpm/rollup@4.60.3/node_modules/rollup/dist/native.js:124:76)
+0.923     at Module._compile (node:internal/modules/cjs/loader:1854:14)
+0.923     at Object..js (node:internal/modules/cjs/loader:1985:10)
+0.923     at Module.load (node:internal/modules/cjs/loader:1577:32)
+0.923     at Module._load (node:internal/modules/cjs/loader:1379:12)
+0.923     at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+0.923     at loadCJSModuleWithModuleLoad (node:internal/modules/esm/translators:326:3)
+0.923     at ModuleWrap.<anonymous> (node:internal/modules/esm/translators:231:7)
+0.923     at ModuleJob.run (node:internal/modules/esm/module_job:439:25) {
+0.923   [cause]: Error: Cannot find module '@rollup/rollup-linux-arm64-musl'
+0.923   Require stack:
+0.923   - /app/node_modules/.pnpm/rollup@4.60.3/node_modules/rollup/dist/native.js
+0.923       at Module._resolveFilename (node:internal/modules/cjs/loader:1500:15)
+0.923       at wrapResolveFilename (node:internal/modules/cjs/loader:1071:27)
+0.923       at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1095:10)
+0.923       at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1116:12)
+0.923       at Module._load (node:internal/modules/cjs/loader:1285:25)
+0.923       at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+0.923       at Module.require (node:internal/modules/cjs/loader:1600:12)
+0.923       at require (node:internal/modules/helpers:153:16)
+0.923       at requireWithFriendlyError (/app/node_modules/.pnpm/rollup@4.60.3/node_modules/rollup/dist/native.js:97:10)
+0.923       at Object.<anonymous> (/app/node_modules/.pnpm/rollup@4.60.3/node_modules/rollup/dist/native.js:124:76) {
+0.923     code: 'MODULE_NOT_FOUND',
+0.923     requireStack: [
+0.923       '/app/node_modules/.pnpm/rollup@4.60.3/node_modules/rollup/dist/native.js'
+0.923     ]
+0.923   }
+0.923 }
+0.923 
+0.923 Node.js v24.16.0
+0.943 /app/artifacts/billiards:
+0.943 [ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @workspace/billiards@0.0.0 build: `vite build --config vite.config.ts`
+0.943 Exit status 1
+------
+[+] build 0/3
+ ⠙ Image bi-a-api      Building                                           15.2s 
+ ⠙ Image bi-a-frontend Building                                           15.2s 
+ ⠙ Image bi-a-migrate  Building                                           15.2s 
+Dockerfile.frontend:15
+
+--------------------
+
+  13 |     # ── Build Vite → dist/public/ ───────────────
+
+  14 |     FROM deps AS builder
+
+  15 | >>> RUN PORT=80 BASE_PATH=/ pnpm --filter @workspace/billiards run build
+
+  16 |     
+
+  17 |     # ── Image nginx cuối cùng ───────────────────
+
+--------------------
+
+target frontend: failed to solve: process "/bin/sh -c PORT=80 BASE_PATH=/ pnpm --filter @workspace/billiards run build" did not complete successfully: exit code: 1
+
+
+
+View build details: docker-desktop://dashboard/build/default/default/o4prq7zmlr8z775wski63jguc
+
+minwedding@DRKdf BI-A % 
