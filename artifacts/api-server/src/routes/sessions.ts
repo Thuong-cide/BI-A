@@ -1,14 +1,30 @@
 import { Router } from "express";
 import { db, tablesTable, sessionsTable, usersTable, settingsTable } from "@workspace/db";
 import { eq, and, desc } from "drizzle-orm";
-import {
-  OpenSessionBody,
-  CloseSessionBody,
-  GetSessionsQueryParams,
-} from "@workspace/api-zod";
+import { OpenSessionBody, GetSessionsQueryParams } from "@workspace/api-zod";
 import { requireAuth, type AuthRequest } from "../middlewares/auth";
 import { appendSessionToSheet } from "../services/google-sheets";
 import { logger } from "../lib/logger";
+
+type ExtraItem = { name: string; price: number };
+
+function parseCloseBody(body: unknown): { tableId: string; userId: string; extraItems: ExtraItem[] } | null {
+  if (!body || typeof body !== "object") return null;
+  const b = body as Record<string, unknown>;
+  if (typeof b.tableId !== "string" || typeof b.userId !== "string") return null;
+  const extraItems: ExtraItem[] = [];
+  if (Array.isArray(b.extraItems)) {
+    for (const item of b.extraItems) {
+      if (item && typeof item === "object") {
+        const it = item as Record<string, unknown>;
+        if (typeof it.name === "string" && typeof it.price === "number") {
+          extraItems.push({ name: it.name, price: Math.round(it.price) });
+        }
+      }
+    }
+  }
+  return { tableId: b.tableId, userId: b.userId, extraItems };
+}
 
 const router = Router();
 
@@ -71,12 +87,12 @@ router.post("/open", requireAuth, async (req: AuthRequest, res) => {
 });
 
 router.post("/close", requireAuth, async (req: AuthRequest, res) => {
-  const parsed = CloseSessionBody.safeParse(req.body);
-  if (!parsed.success) {
+  const parsed = parseCloseBody(req.body);
+  if (!parsed) {
     res.status(400).json({ error: "Invalid input" });
     return;
   }
-  const { tableId, userId } = parsed.data;
+  const { tableId, userId, extraItems } = parsed;
 
   const [table] = await db.select().from(tablesTable).where(eq(tablesTable.id, tableId)).limit(1);
   if (!table) {
@@ -102,7 +118,10 @@ router.post("/close", requireAuth, async (req: AuthRequest, res) => {
   const endTime = new Date();
   const diffMs = endTime.getTime() - table.startTime.getTime();
   const durationMinutes = Math.max(1, Math.round(diffMs / 1000 / 60));
-  const amount = Math.round((pricePerHour / 60) * durationMinutes);
+  const billiardAmount = Math.round((pricePerHour / 60) * durationMinutes);
+  const extraAmount = extraItems.reduce((sum, item) => sum + item.price, 0);
+  const amount = billiardAmount + extraAmount;
+  const extraItemsJson = extraItems.length > 0 ? JSON.stringify(extraItems) : null;
 
   const date = endTime.toISOString().split("T")[0]; // YYYY-MM-DD
 
@@ -120,6 +139,8 @@ router.post("/close", requireAuth, async (req: AuthRequest, res) => {
       endTime,
       durationMinutes,
       amount,
+      extraAmount,
+      extraItemsJson,
       pricePerHour,
       date,
       syncedToSheets: false,

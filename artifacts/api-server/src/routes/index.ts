@@ -6,6 +6,7 @@ import { sessionsRouter } from "./sessions";
 import { settingsRouter } from "./settings";
 import { usersRouter } from "./users";
 import { dashboardRouter } from "./dashboard";
+import { reportRouter } from "./report";
 
 const router: IRouter = Router();
 
@@ -16,5 +17,6 @@ router.use("/sessions", sessionsRouter);
 router.use("/settings", settingsRouter);
 router.use("/users", usersRouter);
 router.use("/dashboard", dashboardRouter);
+router.use("/report", reportRouter);
 
 export default router;

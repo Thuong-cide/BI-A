@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, History, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, History, Settings, LogOut, BarChart2 } from "lucide-react";
 import { useAuth } from "../lib/auth";
 import { Button } from "./ui/button";
 
@@ -46,6 +46,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </Link>
           {isManager && (
             <Link
+              href="/report"
+              className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${location === "/report" ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:bg-accent"}`}
+            >
+              <BarChart2 className="h-5 w-5" />
+              <span>Báo Cáo</span>
+            </Link>
+          )}
+          {isManager && (
+            <Link
               href="/admin"
               className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${location === "/admin" ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:bg-accent"}`}
             >
@@ -77,6 +86,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <History className="h-5 w-5" />
           <span className="text-[10px] font-medium uppercase">Lịch Sử</span>
         </Link>
+        {isManager && (
+          <Link
+            href="/report"
+            className={`flex-1 flex flex-col items-center justify-center gap-1 ${location === "/report" ? "text-primary" : "text-muted-foreground"}`}
+          >
+            <BarChart2 className="h-5 w-5" />
+            <span className="text-[10px] font-medium uppercase">Báo Cáo</span>
+          </Link>
+        )}
         {isManager && (
           <Link
             href="/admin"

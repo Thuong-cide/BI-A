@@ -5,8 +5,10 @@
  * Billiards management API
  * OpenAPI spec version: 0.1.0
  */
+import type { ExtraItem } from './extraItem';
 
 export interface SessionCloseInput {
   tableId: string;
   userId: string;
+  extraItems?: ExtraItem[];
 }

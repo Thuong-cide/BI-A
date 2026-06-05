@@ -24,6 +24,9 @@ export interface Session {
   durationMinutes?: number | null;
   /** @nullable */
   amount?: number | null;
+  extraAmount: number;
+  /** @nullable */
+  extraItemsJson?: string | null;
   pricePerHour: number;
   date: string;
   syncedToSheets: boolean;

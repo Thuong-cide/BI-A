@@ -7,6 +7,7 @@ import Login from "./pages/login";
 import Dashboard from "./pages/dashboard";
 import History from "./pages/history";
 import Admin from "./pages/admin";
+import Report from "./pages/report";
 import NotFound from "./pages/not-found";
 
 const queryClient = new QueryClient();
@@ -17,6 +18,7 @@ function Router() {
       <Route path="/login" component={Login} />
       <Route path="/" component={Dashboard} />
       <Route path="/history" component={History} />
+      <Route path="/report" component={Report} />
       <Route path="/admin" component={Admin} />
       <Route component={NotFound} />
     </Switch>

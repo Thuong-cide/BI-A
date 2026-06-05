@@ -23,9 +23,11 @@ import type {
   AuthResponse,
   DashboardSummary,
   DeleteResult,
+  GetRevenueReportParams,
   GetSessionsParams,
   HealthStatus,
   LoginInput,
+  RevenueReport,
   Session,
   SessionCloseInput,
   SessionCloseResult,
@@ -1375,6 +1377,90 @@ export function useGetDashboardSummary<TData = Awaited<ReturnType<typeof getDash
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getGetDashboardSummaryQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetRevenueReportUrl = (params: GetRevenueReportParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/report/revenue?${stringifiedParams}` : `/api/report/revenue`
+}
+
+/**
+ * @summary Get revenue report for a date range
+ */
+export const getRevenueReport = async (params: GetRevenueReportParams, options?: RequestInit): Promise<RevenueReport> => {
+
+  return customFetch<RevenueReport>(getGetRevenueReportUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetRevenueReportQueryKey = (params?: GetRevenueReportParams,) => {
+    return [
+    `/api/report/revenue`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetRevenueReportQueryOptions = <TData = Awaited<ReturnType<typeof getRevenueReport>>, TError = ErrorType<unknown>>(params: GetRevenueReportParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRevenueReport>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetRevenueReportQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getRevenueReport>>> = ({ signal }) => getRevenueReport(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getRevenueReport>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetRevenueReportQueryResult = NonNullable<Awaited<ReturnType<typeof getRevenueReport>>>
+export type GetRevenueReportQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get revenue report for a date range
+ */
+
+export function useGetRevenueReport<TData = Awaited<ReturnType<typeof getRevenueReport>>, TError = ErrorType<unknown>>(
+ params: GetRevenueReportParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRevenueReport>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetRevenueReportQueryOptions(params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

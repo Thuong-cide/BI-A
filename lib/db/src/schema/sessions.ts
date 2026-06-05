@@ -15,6 +15,8 @@ export const sessionsTable = pgTable("sessions", {
   endTime: timestamp("end_time", { withTimezone: true }),
   durationMinutes: integer("duration_minutes"),
   amount: integer("amount"),
+  extraItemsJson: text("extra_items_json"),
+  extraAmount: integer("extra_amount").notNull().default(0),
   pricePerHour: integer("price_per_hour").notNull(),
   date: text("date").notNull(),
   syncedToSheets: boolean("synced_to_sheets").notNull().default(false),

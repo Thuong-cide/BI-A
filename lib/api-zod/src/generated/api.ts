@@ -159,7 +159,11 @@ export const OpenSessionResponse = zod.object({
  */
 export const CloseSessionBody = zod.object({
   "tableId": zod.string(),
-  "userId": zod.string()
+  "userId": zod.string(),
+  "extraItems": zod.array(zod.object({
+  "name": zod.string(),
+  "price": zod.number()
+})).optional()
 })
 
 export const CloseSessionResponse = zod.object({
@@ -177,6 +181,8 @@ export const CloseSessionResponse = zod.object({
   "endTime": zod.string().nullish(),
   "durationMinutes": zod.number().nullish(),
   "amount": zod.number().nullish(),
+  "extraAmount": zod.number(),
+  "extraItemsJson": zod.string().nullish(),
   "pricePerHour": zod.number(),
   "date": zod.string(),
   "syncedToSheets": zod.boolean(),
@@ -217,6 +223,8 @@ export const GetSessionsResponseItem = zod.object({
   "endTime": zod.string().nullish(),
   "durationMinutes": zod.number().nullish(),
   "amount": zod.number().nullish(),
+  "extraAmount": zod.number(),
+  "extraItemsJson": zod.string().nullish(),
   "pricePerHour": zod.number(),
   "date": zod.string(),
   "syncedToSheets": zod.boolean(),
@@ -323,6 +331,28 @@ export const GetDashboardSummaryResponse = zod.object({
   "todayRevenue": zod.number(),
   "todaySessionsCount": zod.number(),
   "todayTotalMinutes": zod.number()
+})
+
+
+/**
+ * @summary Get revenue report for a date range
+ */
+export const GetRevenueReportQueryParams = zod.object({
+  "from": zod.coerce.string(),
+  "to": zod.coerce.string()
+})
+
+export const GetRevenueReportResponse = zod.object({
+  "data": zod.array(zod.object({
+  "date": zod.string(),
+  "revenue": zod.number(),
+  "sessionCount": zod.number(),
+  "extraRevenue": zod.number(),
+  "billiardRevenue": zod.number()
+})),
+  "totalRevenue": zod.number(),
+  "totalSessions": zod.number(),
+  "totalExtraRevenue": zod.number()
 })
 
 

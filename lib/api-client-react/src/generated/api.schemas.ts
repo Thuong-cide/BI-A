@@ -73,6 +73,11 @@ export interface TableUpdate {
   type?: string | null;
 }
 
+export interface ExtraItem {
+  name: string;
+  price: number;
+}
+
 export interface Session {
   id: string;
   tableId: string;
@@ -91,6 +96,9 @@ export interface Session {
   durationMinutes?: number | null;
   /** @nullable */
   amount?: number | null;
+  extraAmount: number;
+  /** @nullable */
+  extraItemsJson?: string | null;
   pricePerHour: number;
   date: string;
   syncedToSheets: boolean;
@@ -111,6 +119,7 @@ export interface SessionOpenResult {
 export interface SessionCloseInput {
   tableId: string;
   userId: string;
+  extraItems?: ExtraItem[];
 }
 
 export interface SessionCloseResult {
@@ -140,6 +149,21 @@ export interface DashboardSummary {
   todayTotalMinutes: number;
 }
 
+export interface RevenueDataPoint {
+  date: string;
+  revenue: number;
+  sessionCount: number;
+  extraRevenue: number;
+  billiardRevenue: number;
+}
+
+export interface RevenueReport {
+  data: RevenueDataPoint[];
+  totalRevenue: number;
+  totalSessions: number;
+  totalExtraRevenue: number;
+}
+
 export type GetSessionsParams = {
 /**
  * @nullable
@@ -153,5 +177,10 @@ userId?: string | null;
  * @nullable
  */
 tableId?: string | null;
+};
+
+export type GetRevenueReportParams = {
+from: string;
+to: string;
 };
 

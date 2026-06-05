@@ -358,6 +358,30 @@ paths:
               schema:
                 $ref: "#/components/schemas/DashboardSummary"
 
+  /report/revenue:
+    get:
+      operationId: getRevenueReport
+      tags: [dashboard]
+      summary: Get revenue report for a date range
+      parameters:
+        - name: from
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: to
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Revenue report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RevenueReport"
+
 components:
   schemas:
     HealthStatus:
@@ -468,9 +492,18 @@ components:
         type:
           type: ["string", "null"]
 
+    ExtraItem:
+      type: object
+      required: [name, price]
+      properties:
+        name:
+          type: string
+        price:
+          type: integer
+
     Session:
       type: object
-      required: [id, tableId, tableName, tableType, openedById, openedByName, startTime, pricePerHour, date, syncedToSheets, createdAt]
+      required: [id, tableId, tableName, tableType, openedById, openedByName, startTime, pricePerHour, date, syncedToSheets, createdAt, extraAmount]
       properties:
         id:
           type: string
@@ -496,6 +529,10 @@ components:
           type: ["integer", "null"]
         amount:
           type: ["integer", "null"]
+        extraAmount:
+          type: integer
+        extraItemsJson:
+          type: ["string", "null"]
         pricePerHour:
           type: integer
         date:
@@ -533,6 +570,10 @@ components:
           type: string
         userId:
           type: string
+        extraItems:
+          type: array
+          items:
+            $ref: "#/components/schemas/ExtraItem"
 
     SessionCloseResult:
       type: object
@@ -581,4 +622,34 @@ components:
         todaySessionsCount:
           type: integer
         todayTotalMinutes:
+          type: integer
+
+    RevenueDataPoint:
+      type: object
+      required: [date, revenue, sessionCount, extraRevenue, billiardRevenue]
+      properties:
+        date:
+          type: string
+        revenue:
+          type: integer
+        sessionCount:
+          type: integer
+        extraRevenue:
+          type: integer
+        billiardRevenue:
+          type: integer
+
+    RevenueReport:
+      type: object
+      required: [data, totalRevenue, totalSessions, totalExtraRevenue]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/RevenueDataPoint"
+        totalRevenue:
+          type: integer
+        totalSessions:
+          type: integer
+        totalExtraRevenue:
           type: integer
