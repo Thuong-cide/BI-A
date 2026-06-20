@@ -96,14 +96,37 @@ if [ "$PG_CHOICE" = "1" ]; then
 
   EXTERNAL_DB_URL="postgresql://${PG_USER}:${PG_PASS}@${PG_HOST}:${PG_PORT}/${PG_DB}"
 
-  # Kiểm tra kết nối
+  # Kiểm tra kết nối — tự phát hiện Docker network nếu host là tên container
   print_info "Kiểm tra kết nối tới PostgreSQL..."
-  if docker run --rm --network host postgres:16-alpine \
-    pg_isready -h "$PG_HOST" -p "$PG_PORT" -U "$PG_USER" &>/dev/null; then
-    print_ok "Kết nối PostgreSQL thành công."
+  DOCKER_NETWORK=""
+
+  # Kiểm tra xem PG_HOST có phải là tên container đang chạy không
+  if docker inspect "$PG_HOST" &>/dev/null; then
+    # Lấy network đầu tiên của container đó
+    DOCKER_NETWORK=$(docker inspect "$PG_HOST" \
+      --format '{{range $k, $v := .NetworkSettings.Networks}}{{$k}}{{"\n"}}{{end}}' \
+      | head -1 | tr -d '[:space:]')
+    print_info "Phát hiện container '$PG_HOST' đang dùng network: $DOCKER_NETWORK"
+  fi
+
+  if [ -n "$DOCKER_NETWORK" ]; then
+    # Ping qua Docker network nội bộ
+    if docker run --rm --network "$DOCKER_NETWORK" postgres:16-alpine \
+      pg_isready -h "$PG_HOST" -p "$PG_PORT" -U "$PG_USER" &>/dev/null; then
+      print_ok "Kết nối PostgreSQL thành công (qua network: $DOCKER_NETWORK)."
+    else
+      print_warn "Không ping được PostgreSQL. Kiểm tra lại user/password/database."
+      print_warn "Tiếp tục — app sẽ báo lỗi khi khởi động nếu DB không đúng."
+    fi
   else
-    print_warn "Không ping được PostgreSQL tại $PG_HOST:$PG_PORT."
-    print_warn "Tiếp tục nhưng có thể cần kiểm tra lại network Docker."
+    # Host là localhost hoặc IP — dùng host network
+    if docker run --rm --network host postgres:16-alpine \
+      pg_isready -h "$PG_HOST" -p "$PG_PORT" -U "$PG_USER" &>/dev/null; then
+      print_ok "Kết nối PostgreSQL thành công."
+    else
+      print_warn "Không ping được PostgreSQL tại $PG_HOST:$PG_PORT."
+      print_warn "Tiếp tục — app sẽ báo lỗi khi khởi động nếu DB không đúng."
+    fi
   fi
 fi
 
@@ -111,7 +134,41 @@ fi
 if [ "$USE_EXTERNAL_PG" = true ]; then
   print_step "Tạo cấu hình dùng PostgreSQL ngoài..."
 
-  cat > docker-compose.override.yml << EOF
+  # Xác định cách kết nối network cho các service
+  if [ -n "$DOCKER_NETWORK" ]; then
+    # PostgreSQL là container Docker — join cùng network
+    cat > docker-compose.override.yml << EOF
+services:
+  postgres:
+    profiles:
+      - disabled
+
+  migrate:
+    environment:
+      DATABASE_URL: "${EXTERNAL_DB_URL}"
+    networks:
+      - pg_network
+
+  api:
+    environment:
+      DATABASE_URL: "${EXTERNAL_DB_URL}"
+    networks:
+      - pg_network
+      - default
+
+  frontend:
+    networks:
+      - default
+
+networks:
+  pg_network:
+    external: true
+    name: ${DOCKER_NETWORK}
+EOF
+    print_ok "Đã cấu hình join Docker network '${DOCKER_NETWORK}' của PostgreSQL."
+  else
+    # PostgreSQL trên host (localhost/IP) — dùng host network
+    cat > docker-compose.override.yml << EOF
 services:
   postgres:
     profiles:
@@ -130,9 +187,8 @@ services:
   frontend:
     network_mode: host
 EOF
-
-  print_ok "Đã tạo docker-compose.override.yml để dùng PostgreSQL của bạn."
-  print_warn "Lưu ý: network_mode=host được dùng để kết nối tới PostgreSQL bên ngoài."
+    print_ok "Đã cấu hình dùng host network để kết nối PostgreSQL tại $PG_HOST."
+  fi
 else
   # Xóa override cũ nếu có
   rm -f docker-compose.override.yml
