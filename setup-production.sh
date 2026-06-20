@@ -121,6 +121,7 @@ services:
       DATABASE_URL: "${DB_URL}"
     networks:
       - pg_network
+    depends_on: {}
 
   api:
     environment:
@@ -128,10 +129,16 @@ services:
     networks:
       - pg_network
       - default
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
 
   frontend:
     networks:
       - default
+    depends_on:
+      api:
+        condition: service_healthy
 
 networks:
   pg_network:
