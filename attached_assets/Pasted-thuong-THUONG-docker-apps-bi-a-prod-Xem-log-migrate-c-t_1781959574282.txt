@@ -1,0 +1,210 @@
+thuong@THUONG:~/docker-apps/bi-a-prod$ # Xem log migrate (có thể schema chưa được tạo)
+docker compose logs migrate
+
+# Xem log api
+docker compose logs api
+migrate-1  | ▶ Chạy migration schema...
+migrate-1  | $ drizzle-kit push --force --config ./drizzle.config.ts
+migrate-1  | Reading config file '/app/lib/db/drizzle.config.ts'
+migrate-1  | Using 'pg' driver for database querying
+migrate-1  | [⣷] Pulling schema from database...
+[⣯] Pulling schema from database...
+[⣟] Pulling schema from database...
+[✓] Pulling schema from database...
+migrate-1  | [✓] Changes applied
+migrate-1  | ▶ Seed tài khoản mặc định và cài giá...
+migrate-1  | INSERT 0 2
+migrate-1  | INSERT 0 3
+migrate-1  | ✅ Migration hoàn tất.
+api-1  | node:internal/modules/package_json_reader:301
+api-1  |   throw new ERR_MODULE_NOT_FOUND(packageName, fileURLToPath(base), null);
+api-1  |         ^
+api-1  | 
+api-1  | Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'bcrypt' imported from /app/dist/index.mjs
+api-1  |     at Object.getPackageJSONURL (node:internal/modules/package_json_reader:301:9)
+api-1  |     at packageResolve (node:internal/modules/esm/resolve:768:81)
+api-1  |     at moduleResolve (node:internal/modules/esm/resolve:859:18)
+api-1  |     at defaultResolve (node:internal/modules/esm/resolve:992:11)
+api-1  |     at #cachedDefaultResolve (node:internal/modules/esm/loader:691:20)
+api-1  |     at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:708:38)
+api-1  |     at ModuleLoader.resolveSync (node:internal/modules/esm/loader:740:52)
+api-1  |     at #resolve (node:internal/modules/esm/loader:673:17)
+api-1  |     at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:593:35)
+api-1  |     at ModuleJob.syncLink (node:internal/modules/esm/module_job:163:33) {
+api-1  |   code: 'ERR_MODULE_NOT_FOUND'
+api-1  | }
+api-1  | 
+api-1  | Node.js v24.17.0
+api-1  | node:internal/modules/package_json_reader:301
+api-1  |   throw new ERR_MODULE_NOT_FOUND(packageName, fileURLToPath(base), null);
+api-1  |         ^
+api-1  | 
+api-1  | Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'bcrypt' imported from /app/dist/index.mjs
+api-1  |     at Object.getPackageJSONURL (node:internal/modules/package_json_reader:301:9)
+api-1  |     at packageResolve (node:internal/modules/esm/resolve:768:81)
+api-1  |     at moduleResolve (node:internal/modules/esm/resolve:859:18)
+api-1  |     at defaultResolve (node:internal/modules/esm/resolve:992:11)
+api-1  |     at #cachedDefaultResolve (node:internal/modules/esm/loader:691:20)
+api-1  |     at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:708:38)
+api-1  |     at ModuleLoader.resolveSync (node:internal/modules/esm/loader:740:52)
+api-1  |     at #resolve (node:internal/modules/esm/loader:673:17)
+api-1  |     at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:593:35)
+api-1  |     at ModuleJob.syncLink (node:internal/modules/esm/module_job:163:33) {
+api-1  |   code: 'ERR_MODULE_NOT_FOUND'
+api-1  | }
+api-1  | 
+api-1  | Node.js v24.17.0
+api-1  | node:internal/modules/package_json_reader:301
+api-1  |   throw new ERR_MODULE_NOT_FOUND(packageName, fileURLToPath(base), null);
+api-1  |         ^
+api-1  | 
+api-1  | Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'bcrypt' imported from /app/dist/index.mjs
+api-1  |     at Object.getPackageJSONURL (node:internal/modules/package_json_reader:301:9)
+api-1  |     at packageResolve (node:internal/modules/esm/resolve:768:81)
+api-1  |     at moduleResolve (node:internal/modules/esm/resolve:859:18)
+api-1  |     at defaultResolve (node:internal/modules/esm/resolve:992:11)
+api-1  |     at #cachedDefaultResolve (node:internal/modules/esm/loader:691:20)
+api-1  |     at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:708:38)
+api-1  |     at ModuleLoader.resolveSync (node:internal/modules/esm/loader:740:52)
+api-1  |     at #resolve (node:internal/modules/esm/loader:673:17)
+api-1  |     at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:593:35)
+api-1  |     at ModuleJob.syncLink (node:internal/modules/esm/module_job:163:33) {
+api-1  |   code: 'ERR_MODULE_NOT_FOUND'
+api-1  | }
+api-1  | 
+api-1  | Node.js v24.17.0
+api-1  | node:internal/modules/package_json_reader:301
+api-1  |   throw new ERR_MODULE_NOT_FOUND(packageName, fileURLToPath(base), null);
+api-1  |         ^
+api-1  | 
+api-1  | Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'bcrypt' imported from /app/dist/index.mjs
+api-1  |     at Object.getPackageJSONURL (node:internal/modules/package_json_reader:301:9)
+api-1  |     at packageResolve (node:internal/modules/esm/resolve:768:81)
+api-1  |     at moduleResolve (node:internal/modules/esm/resolve:859:18)
+api-1  |     at defaultResolve (node:internal/modules/esm/resolve:992:11)
+api-1  |     at #cachedDefaultResolve (node:internal/modules/esm/loader:691:20)
+api-1  |     at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:708:38)
+api-1  |     at ModuleLoader.resolveSync (node:internal/modules/esm/loader:740:52)
+api-1  |     at #resolve (node:internal/modules/esm/loader:673:17)
+api-1  |     at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:593:35)
+api-1  |     at ModuleJob.syncLink (node:internal/modules/esm/module_job:163:33) {
+api-1  |   code: 'ERR_MODULE_NOT_FOUND'
+api-1  | }
+api-1  | 
+api-1  | Node.js v24.17.0
+api-1  | node:internal/modules/package_json_reader:301
+api-1  |   throw new ERR_MODULE_NOT_FOUND(packageName, fileURLToPath(base), null);
+api-1  |         ^
+api-1  | 
+api-1  | Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'bcrypt' imported from /app/dist/index.mjs
+api-1  |     at Object.getPackageJSONURL (node:internal/modules/package_json_reader:301:9)
+api-1  |     at packageResolve (node:internal/modules/esm/resolve:768:81)
+api-1  |     at moduleResolve (node:internal/modules/esm/resolve:859:18)
+api-1  |     at defaultResolve (node:internal/modules/esm/resolve:992:11)
+api-1  |     at #cachedDefaultResolve (node:internal/modules/esm/loader:691:20)
+api-1  |     at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:708:38)
+api-1  |     at ModuleLoader.resolveSync (node:internal/modules/esm/loader:740:52)
+api-1  |     at #resolve (node:internal/modules/esm/loader:673:17)
+api-1  |     at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:593:35)
+api-1  |     at ModuleJob.syncLink (node:internal/modules/esm/module_job:163:33) {
+api-1  |   code: 'ERR_MODULE_NOT_FOUND'
+api-1  | }
+api-1  | 
+api-1  | Node.js v24.17.0
+api-1  | node:internal/modules/package_json_reader:301
+api-1  |   throw new ERR_MODULE_NOT_FOUND(packageName, fileURLToPath(base), null);
+api-1  |         ^
+api-1  | 
+api-1  | Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'bcrypt' imported from /app/dist/index.mjs
+api-1  |     at Object.getPackageJSONURL (node:internal/modules/package_json_reader:301:9)
+api-1  |     at packageResolve (node:internal/modules/esm/resolve:768:81)
+api-1  |     at moduleResolve (node:internal/modules/esm/resolve:859:18)
+api-1  |     at defaultResolve (node:internal/modules/esm/resolve:992:11)
+api-1  |     at #cachedDefaultResolve (node:internal/modules/esm/loader:691:20)
+api-1  |     at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:708:38)
+api-1  |     at ModuleLoader.resolveSync (node:internal/modules/esm/loader:740:52)
+api-1  |     at #resolve (node:internal/modules/esm/loader:673:17)
+api-1  |     at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:593:35)
+api-1  |     at ModuleJob.syncLink (node:internal/modules/esm/module_job:163:33) {
+api-1  |   code: 'ERR_MODULE_NOT_FOUND'
+api-1  | }
+api-1  | 
+api-1  | Node.js v24.17.0
+api-1  | node:internal/modules/package_json_reader:301
+api-1  |   throw new ERR_MODULE_NOT_FOUND(packageName, fileURLToPath(base), null);
+api-1  |         ^
+api-1  | 
+api-1  | Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'bcrypt' imported from /app/dist/index.mjs
+api-1  |     at Object.getPackageJSONURL (node:internal/modules/package_json_reader:301:9)
+api-1  |     at packageResolve (node:internal/modules/esm/resolve:768:81)
+api-1  |     at moduleResolve (node:internal/modules/esm/resolve:859:18)
+api-1  |     at defaultResolve (node:internal/modules/esm/resolve:992:11)
+api-1  |     at #cachedDefaultResolve (node:internal/modules/esm/loader:691:20)
+api-1  |     at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:708:38)
+api-1  |     at ModuleLoader.resolveSync (node:internal/modules/esm/loader:740:52)
+api-1  |     at #resolve (node:internal/modules/esm/loader:673:17)
+api-1  |     at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:593:35)
+api-1  |     at ModuleJob.syncLink (node:internal/modules/esm/module_job:163:33) {
+api-1  |   code: 'ERR_MODULE_NOT_FOUND'
+api-1  | }
+api-1  | 
+api-1  | Node.js v24.17.0
+api-1  | node:internal/modules/package_json_reader:301
+api-1  |   throw new ERR_MODULE_NOT_FOUND(packageName, fileURLToPath(base), null);
+api-1  |         ^
+api-1  | 
+api-1  | Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'bcrypt' imported from /app/dist/index.mjs
+api-1  |     at Object.getPackageJSONURL (node:internal/modules/package_json_reader:301:9)
+api-1  |     at packageResolve (node:internal/modules/esm/resolve:768:81)
+api-1  |     at moduleResolve (node:internal/modules/esm/resolve:859:18)
+api-1  |     at defaultResolve (node:internal/modules/esm/resolve:992:11)
+api-1  |     at #cachedDefaultResolve (node:internal/modules/esm/loader:691:20)
+api-1  |     at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:708:38)
+api-1  |     at ModuleLoader.resolveSync (node:internal/modules/esm/loader:740:52)
+api-1  |     at #resolve (node:internal/modules/esm/loader:673:17)
+api-1  |     at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:593:35)
+api-1  |     at ModuleJob.syncLink (node:internal/modules/esm/module_job:163:33) {
+api-1  |   code: 'ERR_MODULE_NOT_FOUND'
+api-1  | }
+api-1  | 
+api-1  | Node.js v24.17.0
+api-1  | node:internal/modules/package_json_reader:301
+api-1  |   throw new ERR_MODULE_NOT_FOUND(packageName, fileURLToPath(base), null);
+api-1  |         ^
+api-1  | 
+api-1  | Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'bcrypt' imported from /app/dist/index.mjs
+api-1  |     at Object.getPackageJSONURL (node:internal/modules/package_json_reader:301:9)
+api-1  |     at packageResolve (node:internal/modules/esm/resolve:768:81)
+api-1  |     at moduleResolve (node:internal/modules/esm/resolve:859:18)
+api-1  |     at defaultResolve (node:internal/modules/esm/resolve:992:11)
+api-1  |     at #cachedDefaultResolve (node:internal/modules/esm/loader:691:20)
+api-1  |     at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:708:38)
+api-1  |     at ModuleLoader.resolveSync (node:internal/modules/esm/loader:740:52)
+api-1  |     at #resolve (node:internal/modules/esm/loader:673:17)
+api-1  |     at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:593:35)
+api-1  |     at ModuleJob.syncLink (node:internal/modules/esm/module_job:163:33) {
+api-1  |   code: 'ERR_MODULE_NOT_FOUND'
+api-1  | }
+api-1  | 
+api-1  | Node.js v24.17.0
+api-1  | node:internal/modules/package_json_reader:301
+api-1  |   throw new ERR_MODULE_NOT_FOUND(packageName, fileURLToPath(base), null);
+api-1  |         ^
+api-1  | 
+api-1  | Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'bcrypt' imported from /app/dist/index.mjs
+api-1  |     at Object.getPackageJSONURL (node:internal/modules/package_json_reader:301:9)
+api-1  |     at packageResolve (node:internal/modules/esm/resolve:768:81)
+api-1  |     at moduleResolve (node:internal/modules/esm/resolve:859:18)
+api-1  |     at defaultResolve (node:internal/modules/esm/resolve:992:11)
+api-1  |     at #cachedDefaultResolve (node:internal/modules/esm/loader:691:20)
+api-1  |     at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:708:38)
+api-1  |     at ModuleLoader.resolveSync (node:internal/modules/esm/loader:740:52)
+api-1  |     at #resolve (node:internal/modules/esm/loader:673:17)
+api-1  |     at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:593:35)
+api-1  |     at ModuleJob.syncLink (node:internal/modules/esm/module_job:163:33) {
+api-1  |   code: 'ERR_MODULE_NOT_FOUND'
+api-1  | }
+api-1  | 
+api-1  | Node.js v24.17.0
+thuong@THUONG:~/docker-apps/bi-a-prod$ 
+
