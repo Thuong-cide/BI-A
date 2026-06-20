@@ -112,16 +112,24 @@ print_ok "Đã tạo .env với JWT_SECRET ngẫu nhiên."
 print_step "Tạo cấu hình kết nối PostgreSQL..."
 cat > docker-compose.override.yml << EOF
 services:
+  # Thay postgres bằng container giả luôn healthy
+  # để không phá vỡ depends_on của migrate
   postgres:
-    profiles:
-      - disabled
+    image: alpine:latest
+    command: tail -f /dev/null
+    healthcheck:
+      test: ["CMD", "true"]
+      interval: 1s
+      timeout: 1s
+      retries: 1
+      start_period: 1s
 
   migrate:
     environment:
       DATABASE_URL: "${DB_URL}"
     networks:
       - pg_network
-    depends_on: {}
+      - default
 
   api:
     environment:
@@ -129,16 +137,10 @@ services:
     networks:
       - pg_network
       - default
-    depends_on:
-      migrate:
-        condition: service_completed_successfully
 
   frontend:
     networks:
       - default
-    depends_on:
-      api:
-        condition: service_healthy
 
 networks:
   pg_network:
